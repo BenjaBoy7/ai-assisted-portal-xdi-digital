@@ -20,7 +20,7 @@ export const WizardProgress = ({ currentStep, onStepClick }: WizardProgressProps
   const progressPercentage = ((currentStep + 1) / steps.length) * 100
 
   return (
-    <Box className="wizard-progress" aria-label="Application progress">
+    <Box className="wizard-progress" aria-label={t('common.portalTitle')}>
       <Box className="wizard-progress-header wizard-steps-track">
         {steps.map((step, index) => {
           const isActive = index === currentStep
@@ -28,10 +28,10 @@ export const WizardProgress = ({ currentStep, onStepClick }: WizardProgressProps
 
           return (
             <Box
+              component="button"
+              type="button"
               key={step.label}
               className={`wizard-step ${isActive ? 'wizard-step-active' : ''} ${isCompleted ? 'wizard-step-completed' : ''}`}
-              role="button"
-              tabIndex={0}
               onClick={() => onStepClick?.(index)}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
