@@ -4,7 +4,7 @@ Premium React front-end case study for a government-grade social support applica
 
 ## Table of Contents
 
-- [Evaluation Coverage](#evaluation-coverage)
+- [Coverage](#evaluation-coverage)
 - [Key Features](#key-features)
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
