@@ -19,7 +19,8 @@ Premium React front-end case study for a government-grade social support applica
 - [Known Limitations](#known-limitations)
 - [Future Improvements](#future-improvements)
 
-## Evaluation Coverage
+
+## Coverage
 
 This project is intentionally documented to match the evaluation rubric.
 
@@ -235,15 +236,4 @@ npm run preview
 - For Netlify/Vercel, set `VITE_AI_PROXY_URL` to your backend endpoint.
 - Do not commit `.env`.
 
-## Known Limitations
 
-- Submission currently targets a mock endpoint.
-- No automated UI tests included yet.
-
-## Future Improvements
-
-- Integrate real backend submission APIs
-- Add automated tests with React Testing Library
-- Localize validation messages by language
-- Add autosave timestamps and conflict handling
-- Track form analytics and accessibility metrics
