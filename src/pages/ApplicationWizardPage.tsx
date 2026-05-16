@@ -85,6 +85,11 @@ export const ApplicationWizardPage = () => {
     setCurrentStep(Math.max(activeStep - 1, 0))
   }
 
+  const handleStepSelect = (step: number) => {
+    const boundedStep = Math.min(Math.max(step, 0), 2)
+    setCurrentStep(boundedStep)
+  }
+
   const closeAiModal = () => {
     setAiModalOpen(false)
     setAiSuggestion('')
@@ -155,71 +160,76 @@ export const ApplicationWizardPage = () => {
 
   return (
     <PortalShell>
-      <WizardProgress currentStep={currentStep} />
+      <WizardProgress currentStep={currentStep} onStepClick={handleStepSelect} />
 
       <Paper className="form-card" elevation={0}>
-        <Typography variant="h5" className="step-title">
-          {stepTitle}
-        </Typography>
-
-        <FormProvider {...formMethods}>
-          <form onSubmit={onSubmit} noValidate>
-            {activeStep === 0 ? <StepOnePersonalInfo /> : null}
-            {activeStep === 1 ? <StepTwoFamilyFinancial /> : null}
-            {activeStep === 2 ? (
-              <StepThreeSituation
-                onHelpMeWrite={requestWritingHelp}
-                isGenerating={aiLoading}
-                apiError={aiError}
-              />
-            ) : null}
-
-            <Box className="wizard-controls">
-              <Button
-                variant="outlined"
-                onClick={handlePrevious}
-                disabled={activeStep === 0 || submissionStatus === 'loading'}
-              >
-                {t('form.previous')}
-              </Button>
-
-              {activeStep < 2 ? (
-                <Button variant="contained" onClick={handleNext}>
-                  {t('form.next')}
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={submissionStatus === 'loading'}
-                  startIcon={
-                    submissionStatus === 'loading' ? (
-                      <CircularProgress color="inherit" size={18} />
-                    ) : undefined
-                  }
-                >
-                  {submissionStatus === 'loading'
-                    ? t('form.submitting')
-                    : t('form.submit')}
-                </Button>
-              )}
-            </Box>
-          </form>
-        </FormProvider>
-
         {submissionStatus === 'success' ? (
-          <Alert
-            severity="success"
-            action={
-              <Button color="inherit" size="small" onClick={startNewApplication}>
-                {t('submission.restart')}
-              </Button>
-            }
-          >
-            <strong>{t('submission.successTitle')}</strong>
-            <div>{t('submission.successBody')}</div>
-          </Alert>
-        ) : null}
+          <Box className="submission-success-panel">
+            <Alert
+              severity="success"
+              sx={{ width: '100%' }}
+              action={
+                <Button color="inherit" size="small" onClick={startNewApplication}>
+                  {t('submission.restart')}
+                </Button>
+              }
+            >
+              <strong>{t('submission.successTitle')}</strong>
+              <div>{t('submission.successBody')}</div>
+            </Alert>
+          </Box>
+        ) : (
+          <>
+            <Typography variant="h5" className="step-title">
+              {stepTitle}
+            </Typography>
+
+            <FormProvider {...formMethods}>
+              <form onSubmit={onSubmit} noValidate>
+                {activeStep === 0 ? <StepOnePersonalInfo /> : null}
+                {activeStep === 1 ? <StepTwoFamilyFinancial /> : null}
+                {activeStep === 2 ? (
+                  <StepThreeSituation
+                    onHelpMeWrite={requestWritingHelp}
+                    isGenerating={aiLoading}
+                    apiError={aiError}
+                  />
+                ) : null}
+
+                <Box className="wizard-controls">
+                  <Button
+                    variant="outlined"
+                    onClick={handlePrevious}
+                    disabled={activeStep === 0 || submissionStatus === 'loading'}
+                  >
+                    {t('form.previous')}
+                  </Button>
+
+                  {activeStep < 2 ? (
+                    <Button variant="contained" onClick={handleNext}>
+                      {t('form.next')}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={submissionStatus === 'loading'}
+                      startIcon={
+                        submissionStatus === 'loading' ? (
+                          <CircularProgress color="inherit" size={18} />
+                        ) : undefined
+                      }
+                    >
+                      {submissionStatus === 'loading'
+                        ? t('form.submitting')
+                        : t('form.submit')}
+                    </Button>
+                  )}
+                </Box>
+              </form>
+            </FormProvider>
+          </>
+        )}
       </Paper>
 
       <AiSuggestionModal

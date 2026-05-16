@@ -7,17 +7,36 @@ import {
   Select,
   TextField,
 } from '@mui/material'
+import PhoneInput, {
+  parsePhoneNumber,
+} from 'react-phone-number-input'
+import { useMemo } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 
 import type { ApplicationFormData } from '../../types/application'
 
+const formatDateInput = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export const StepOnePersonalInfo = () => {
   const { t } = useTranslation()
   const {
     control,
+    getValues,
+    setValue,
     formState: { errors },
   } = useFormContext<ApplicationFormData>()
+  const defaultCountry = useMemo(() => 'AE' as const, [])
+  const latestEligibleBirthDate = useMemo(() => {
+    const date = new Date()
+    date.setFullYear(date.getFullYear() - 20)
+    return formatDateInput(date)
+  }, [])
 
   return (
     <Box className="form-grid-two-columns">
@@ -58,6 +77,7 @@ export const StepOnePersonalInfo = () => {
             type="date"
             label={t('form.dateOfBirth')}
             InputLabelProps={{ shrink: true }}
+            inputProps={{ max: latestEligibleBirthDate }}
             error={Boolean(errors.dateOfBirth)}
             helperText={errors.dateOfBirth?.message}
             fullWidth
@@ -149,13 +169,42 @@ export const StepOnePersonalInfo = () => {
         name="phoneNumber"
         control={control}
         render={({ field }) => (
-          <TextField
-            {...field}
-            label={t('form.phoneNumber')}
-            error={Boolean(errors.phoneNumber)}
-            helperText={errors.phoneNumber?.message}
-            fullWidth
-          />
+          <FormControl fullWidth error={Boolean(errors.phoneNumber)}>
+            <fieldset
+              className={`phone-input-fieldset ${errors.phoneNumber ? 'phone-input-fieldset-error' : ''}`}
+            >
+              <legend>{t('form.phoneNumber')}</legend>
+              <PhoneInput
+                id="phone-number-input"
+                international
+                countryCallingCodeEditable={false}
+                defaultCountry={defaultCountry}
+                placeholder="+971"
+                value={field.value || undefined}
+                onChange={(nextValue) => {
+                  const safeValue = nextValue ?? ''
+                  field.onChange(safeValue)
+
+                  if (!safeValue) {
+                    return
+                  }
+
+                  const detectedCountry = parsePhoneNumber(safeValue)?.country
+                  const currentCountry = getValues('country')
+
+                  if (detectedCountry && !currentCountry.trim()) {
+                    setValue('country', detectedCountry, {
+                      shouldDirty: true,
+                    })
+                  }
+                }}
+                onBlur={field.onBlur}
+                className="phone-input-field"
+                aria-label={t('form.phoneNumber')}
+              />
+            </fieldset>
+            <FormHelperText>{errors.phoneNumber?.message}</FormHelperText>
+          </FormControl>
         )}
       />
 

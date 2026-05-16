@@ -38,16 +38,30 @@ const writeSavedState = (savedState: SavedApplicationState) => {
   )
 }
 
+const normalizePhoneDefaults = (data: ApplicationFormData): ApplicationFormData => {
+  const isOnlyDialCode = /^\+\d{1,4}$/.test(data.phoneNumber.trim())
+  const normalizedPhoneNumber =
+    !data.phoneNumber.trim() || isOnlyDialCode ? '+971' : data.phoneNumber
+  const normalizedCountry = data.country.trim() || 'United Arab Emirates'
+
+  return {
+    ...data,
+    phoneNumber: normalizedPhoneNumber,
+    country: normalizedCountry,
+  }
+}
+
 export const ApplicationFormProvider = ({
   children,
 }: {
   children: React.ReactNode
 }) => {
   const savedState = readSavedState()
-
-  const [data, setData] = useState<ApplicationFormData>(
+  const initialData = normalizePhoneDefaults(
     savedState?.data ?? defaultApplicationFormData,
   )
+
+  const [data, setData] = useState<ApplicationFormData>(initialData)
   const [currentStep, setCurrentStepState] = useState(savedState?.currentStep ?? 0)
 
   const setCurrentStep = useCallback(

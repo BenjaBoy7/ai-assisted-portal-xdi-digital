@@ -1,37 +1,63 @@
-import { Box, Chip, LinearProgress, Typography } from '@mui/material'
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import Groups2OutlinedIcon from '@mui/icons-material/Groups2Outlined'
+import { Box, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
 interface WizardProgressProps {
   currentStep: number
+  onStepClick?: (step: number) => void
 }
 
-const stepLabels = ['steps.personal', 'steps.family', 'steps.situation']
+const steps = [
+  { label: 'steps.personal', icon: <BadgeOutlinedIcon fontSize="small" /> },
+  { label: 'steps.family', icon: <Groups2OutlinedIcon fontSize="small" /> },
+  { label: 'steps.situation', icon: <DescriptionOutlinedIcon fontSize="small" /> },
+] as const
 
-export const WizardProgress = ({ currentStep }: WizardProgressProps) => {
+export const WizardProgress = ({ currentStep, onStepClick }: WizardProgressProps) => {
   const { t } = useTranslation()
+  const progressPercentage = ((currentStep + 1) / steps.length) * 100
 
   return (
     <Box className="wizard-progress" aria-label="Application progress">
-      <Box className="wizard-progress-header">
-        {stepLabels.map((label, index) => (
-          <Chip
-            key={label}
-            label={`${index + 1}. ${t(label)}`}
-            className={index === currentStep ? 'step-chip-active' : 'step-chip'}
-            color={index === currentStep ? 'primary' : 'default'}
-            variant={index === currentStep ? 'filled' : 'outlined'}
-          />
-        ))}
+      <Box className="wizard-progress-header wizard-steps-track">
+        {steps.map((step, index) => {
+          const isActive = index === currentStep
+          const isCompleted = index < currentStep
+
+          return (
+            <Box
+              key={step.label}
+              className={`wizard-step ${isActive ? 'wizard-step-active' : ''} ${isCompleted ? 'wizard-step-completed' : ''}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => onStepClick?.(index)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  onStepClick?.(index)
+                }
+              }}
+              aria-current={isActive ? 'step' : undefined}
+              aria-label={`Go to ${t(step.label)}`}
+            >
+              <span className="wizard-step-circle" aria-hidden>
+                <span className="wizard-step-number">{index + 1}</span>
+                <span className="wizard-step-icon">{step.icon}</span>
+              </span>
+              <span className="wizard-step-label">{t(step.label)}</span>
+            </Box>
+          )
+        })}
       </Box>
 
-      <LinearProgress
-        variant="determinate"
-        value={((currentStep + 1) / stepLabels.length) * 100}
-        sx={{ height: 10, borderRadius: 12 }}
-      />
+      <Box className="wizard-progress-rail" role="presentation">
+        <Box className="wizard-progress-fill" style={{ width: `${progressPercentage}%` }} />
+      </Box>
 
-      <Typography variant="body2" color="text.secondary" mt={1}>
-        {`Step ${currentStep + 1} of ${stepLabels.length}`}
+      <Typography variant="body2" color="text.secondary" mt={1} className="wizard-step-count">
+        {`${currentStep + 1} / ${steps.length}`}
       </Typography>
     </Box>
   )
